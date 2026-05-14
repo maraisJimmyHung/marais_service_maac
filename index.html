@@ -599,9 +599,22 @@ function log(msg, type = 'info') {
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-function toUTC(dateStr, time) {
-  // 直接以日期原值組成 UTC，避免時區偏移導致跨月
-  return dateStr + 'T' + time + 'Z';
+function toUTC(dateStr, time, isStart) {
+  // 台北時間轉 UTC：台北 00:00 = UTC 前一天 16:00
+  // 但直接減 8 小時會跨月導致 API 拒絕
+  // 所以起始日用當天 00:00 UTC（多涵蓋前 8 小時）
+  // 結束日用當天 23:59 UTC +8 小時 → 隔天 07:59 UTC
+  if (isStart) {
+    return dateStr + 'T00:00:00Z';
+  } else {
+    // 結束日隔天 07:59:59 UTC = 台北時間當天 23:59:59
+    const d = new Date(dateStr + 'T00:00:00Z');
+    d.setUTCDate(d.getUTCDate() + 1);
+    const y = d.getUTCFullYear();
+    const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(d.getUTCDate()).padStart(2, '0');
+    return y + '-' + m + '-' + day + 'T07:59:59Z';
+  }
 }
 
 // ===== 主流程 =====
@@ -628,8 +641,8 @@ async function execute() {
   if (!startStr) { alert('請選擇起始日期'); return; }
   if (!endStr) { alert('請選擇結束日期'); return; }
 
-  const startedAt = toUTC(startStr, '00:00:00');
-  const endedAt = toUTC(endStr, '23:59:59');
+  const startedAt = toUTC(startStr, '00:00:00', true);
+  const endedAt = toUTC(endStr, '23:59:59', false);
 
   document.getElementById('qiChannel').textContent = CHANNEL_NAMES[channelId];
   document.getElementById('qiStart').textContent = startStr + ' 00:00:00';
