@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAAC 訊息備份</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Serif TC', serif;
+    background-color: #f5f0eb;
+    color: #4a4540;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 48px 20px;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(200,190,175,0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(180,170,155,0.1) 0%, transparent 50%);
+  }
+
+  .container {
+    width: 100%;
+    max-width: 480px;
+  }
+
+  .zen-line {
+    text-align: center;
+    margin-bottom: 28px;
+    opacity: 0.25;
+    letter-spacing: 14px;
+    font-size: 10px;
+    color: #9e9588;
+  }
+
+  .card {
+    background: linear-gradient(145deg, #faf7f3 0%, #f0ebe4 100%);
+    border: 1px solid rgba(180,170,155,0.3);
+    border-radius: 3px;
+    padding: 36px 32px;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.04);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(160,148,130,0.4), transparent);
+  }
+
+  h1 {
+    font-size: 18px;
+    font-weight: 400;
+    letter-spacing: 6px;
+    text-align: center;
+    color: #5c554d;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 11px;
+    color: #a09889;
+    letter-spacing: 2px;
+    margin-bottom: 32px;
+  }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(160,148,130,0.25), transparent);
+    margin: 24px 0;
+  }
+
+  .section-label {
+    display: block;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: #8a827a;
+    margin-bottom: 10px;
+    font-weight: 400;
+  }
+
+  /* ===== 登入畫面 ===== */
+  .login-view {
+    text-align: center;
+    padding: 20px 0;
+  }
+
+  .login-view .login-icon {
+    font-size: 32px;
+    opacity: 0.3;
+    margin-bottom: 20px;
+  }
+
+  .login-view p {
+    font-size: 13px;
+    color: #8a827a;
+    letter-spacing: 1px;
+    margin-bottom: 28px;
+    line-height: 1.8;
+  }
+
+  .btn-google {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 32px;
+    font-family: 'Noto Serif TC', serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: #5c554d;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid rgba(180,170,155,0.3);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .btn-google:hover {
+    background: rgba(255,255,255,0.9);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  .btn-google svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* ===== 使用者資訊列 ===== */
+  .user-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(180,170,155,0.15);
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid rgba(180,170,155,0.3);
+  }
+
+  .user-name {
+    font-size: 12px;
+    color: #8a827a;
+    letter-spacing: 1px;
+  }
+
+  .btn-logout {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 11px;
+    color: #b5ad9e;
+    background: none;
+    border: 1px solid rgba(180,170,155,0.2);
+    padding: 4px 12px;
+    border-radius: 2px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+  }
+
+  .btn-logout:hover {
+    color: #8a827a;
+    border-color: rgba(180,170,155,0.4);
+  }
+
+  /* ===== 頻道選擇 ===== */
+  .channel-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .channel-option {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    border-bottom: 1px solid rgba(180,170,155,0.1);
+    margin: 0;
+    font-size: inherit;
+    letter-spacing: normal;
+    color: inherit;
+  }
+
+  .channel-option:last-child { border-bottom: none; }
+  .channel-option:hover { background: rgba(180,170,155,0.07); }
+
+  .channel-option input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid #c0b8ad;
+    border-radius: 50%;
+    margin-right: 12px;
+    flex-shrink: 0;
+    position: relative;
+    transition: border-color 0.25s ease;
+    cursor: pointer;
+  }
+
+  .channel-option input[type="radio"]:checked { border-color: #8a7e70; }
+
+  .channel-option input[type="radio"]:checked::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #8a7e70;
+  }
+
+  .ch-name { font-size: 13px; color: #5c554d; letter-spacing: 1px; }
+
+  .ch-tag {
+    margin-left: auto;
+    font-size: 10px;
+    color: #b5ad9e;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    border: 1px solid rgba(180,170,155,0.25);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ===== 日期 ===== */
+  .date-row { display: flex; gap: 16px; }
+
+  .date-field { flex: 1; min-width: 0; }
+
+  .date-label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: #8a827a;
+    margin-bottom: 8px;
+  }
+
+  .date-input {
+    width: 100%;
+    font-family: 'Noto Serif TC', serif;
+    font-size: 14px;
+    padding: 10px 12px;
+    border: 1px solid rgba(180,170,155,0.3);
+    border-radius: 2px;
+    background: rgba(255,255,255,0.5);
+    color: #4a4540;
+    outline: none;
+    transition: all 0.3s ease;
+    text-align: center;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .date-input::-webkit-calendar-picker-indicator {
+    opacity: 0.4;
+    cursor: pointer;
+  }
+
+  .date-input:focus {
+    border-color: rgba(138,126,112,0.5);
+    background: rgba(255,255,255,0.7);
+    box-shadow: 0 0 0 3px rgba(138,126,112,0.06);
+  }
+
+  .date-hint {
+    font-size: 10px;
+    color: #b5ad9e;
+    margin-top: 8px;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+
+  /* ===== 按鈕 ===== */
+  .btn-execute {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    margin-top: 28px;
+    font-family: 'Noto Serif TC', serif;
+    font-size: 13px;
+    letter-spacing: 4px;
+    color: #f5f0eb;
+    background: linear-gradient(135deg, #7a7168 0%, #655d54 100%);
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.35s ease;
+  }
+
+  .btn-execute:hover {
+    background: linear-gradient(135deg, #8a8178 0%, #756d64 100%);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+
+  .btn-execute:active { transform: scale(0.995); }
+  .btn-execute:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ===== 查詢資訊 ===== */
+  .query-info {
+    margin-top: 20px;
+    padding: 14px 16px;
+    background: rgba(180,170,155,0.06);
+    border-left: 2px solid rgba(180,170,155,0.2);
+    display: none;
+  }
+
+  .query-info.show { display: block; }
+
+  .qi-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    padding: 3px 0;
+    color: #8a827a;
+    letter-spacing: 1px;
+    gap: 12px;
+  }
+
+  .qi-label { flex-shrink: 0; }
+
+  .qi-value {
+    color: #5c554d;
+    font-family: 'SF Mono', 'Menlo', 'Courier New', monospace;
+    font-size: 11px;
+    text-align: right;
+    word-break: break-all;
+  }
+
+  /* ===== 日誌 ===== */
+  .status-panel { margin-top: 20px; display: none; }
+  .status-panel.show { display: block; }
+
+  .log-area {
+    background: rgba(60,55,48,0.95);
+    border-radius: 3px;
+    padding: 16px;
+    min-height: 60px;
+    max-height: 220px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    font-family: 'SF Mono', 'Menlo', 'Courier New', monospace;
+    font-size: 11px;
+    line-height: 1.8;
+    color: #c8c0b4;
+    word-break: break-all;
+  }
+
+  .log-area::-webkit-scrollbar { width: 4px; }
+  .log-area::-webkit-scrollbar-track { background: transparent; }
+  .log-area::-webkit-scrollbar-thumb { background: rgba(200,192,180,0.2); border-radius: 2px; }
+
+  .log-line { opacity: 0; animation: fadeIn 0.4s ease forwards; }
+  .log-line.info { color: #c8c0b4; }
+  .log-line.success { color: #a8b89a; }
+  .log-line.error { color: #c49a8a; }
+  .log-line.dim { color: #7a7570; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== 結果 ===== */
+  .result-card {
+    margin-top: 16px;
+    padding: 20px;
+    background: rgba(168,184,154,0.1);
+    border: 1px solid rgba(168,184,154,0.2);
+    border-radius: 3px;
+    display: none;
+    text-align: center;
+  }
+
+  .result-card.show { display: block; }
+  .result-icon { font-size: 20px; margin-bottom: 8px; opacity: 0.5; }
+  .result-text { font-size: 13px; color: #6b7a5e; letter-spacing: 2px; margin-bottom: 4px; }
+  .result-sub { font-size: 11px; color: #a09889; word-break: break-all; }
+
+  .result-card.error-card {
+    background: rgba(196,154,138,0.08);
+    border-color: rgba(196,154,138,0.2);
+  }
+  .result-card.error-card .result-text { color: #9a6a5a; }
+
+  .footer-zen {
+    text-align: center;
+    margin-top: 24px;
+    opacity: 0.2;
+    font-size: 10px;
+    letter-spacing: 8px;
+    color: #9e9588;
+  }
+
+  /* ===== 顯示控制 ===== */
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="zen-line">--- --- ---</div>
+
+  <div class="card">
+    <h1>訊息備份</h1>
+    <p class="subtitle">MAAC Messages Backup</p>
+
+    <!-- ====== 登入畫面 ====== -->
+    <div id="loginView" class="login-view">
+      <div class="login-icon">&#9711;</div>
+      <p>請先登入以使用備份功能</p>
+      <button class="btn-google" onclick="googleLogin()">
+        <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.0 24.0 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Google 登入
+      </button>
+    </div>
+
+    <!-- ====== 主功能區（登入後顯示）====== -->
+    <div id="appView" class="hidden">
+
+      <div class="user-bar">
+        <div class="user-info">
+          <img id="userAvatar" class="user-avatar" src="" alt="">
+          <span id="userName" class="user-name"></span>
+        </div>
+        <button class="btn-logout" onclick="logout()">登出</button>
+      </div>
+
+      <span class="section-label">頻道選擇</span>
+      <div class="channel-group">
+        <label class="channel-option">
+          <input type="radio" name="channel" value="4212">
+          <span class="ch-name">瑪黑家居選物</span>
+          <span class="ch-tag">Line</span>
+        </label>
+        <label class="channel-option">
+          <input type="radio" name="channel" value="9830">
+          <span class="ch-name">瑪黑客服</span>
+          <span class="ch-tag">Line</span>
+        </label>
+        <label class="channel-option">
+          <input type="radio" name="channel" value="9941">
+          <span class="ch-name">瑪黑家居選物</span>
+          <span class="ch-tag">FB</span>
+        </label>
+        <label class="channel-option">
+          <input type="radio" name="channel" value="9939">
+          <span class="ch-name">瑪黑家居選物</span>
+          <span class="ch-tag">IG</span>
+        </label>
+        <label class="channel-option">
+          <input type="radio" name="channel" value="10585">
+          <span class="ch-name">瑪黑秘密會小幫手</span>
+          <span class="ch-tag">FB</span>
+        </label>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="date-row">
+        <div class="date-field">
+          <span class="date-label">起始日期</span>
+          <input type="date" class="date-input" id="startDate">
+        </div>
+        <div class="date-field">
+          <span class="date-label">結束日期</span>
+          <input type="date" class="date-input" id="endDate">
+        </div>
+      </div>
+      <div class="date-hint">開始與結束需在一個月內</div>
+
+      <button class="btn-execute" id="btnExecute" onclick="execute()">開始備份</button>
+
+      <div class="query-info" id="queryInfo">
+        <div class="qi-row"><span class="qi-label">頻道</span><span class="qi-value" id="qiChannel">-</span></div>
+        <div class="qi-row"><span class="qi-label">查詢開始 (台北)</span><span class="qi-value" id="qiStart">-</span></div>
+        <div class="qi-row"><span class="qi-label">查詢結束 (台北)</span><span class="qi-value" id="qiEnd">-</span></div>
+      </div>
+
+      <div class="status-panel" id="statusPanel">
+        <div class="log-area" id="logArea"></div>
+      </div>
+
+      <div class="result-card" id="resultCard">
+        <div class="result-icon">&#9675;</div>
+        <div class="result-text" id="resultText">備份完成</div>
+        <div class="result-sub" id="resultSub"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-zen">&#8226; &#8226; &#8226;</div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+<script>
+// ==============================================
+// ★ 設定區 — 請填入你的資訊 ★
+// ==============================================
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBD52hSrLlDqoks7BjfcQ-CdDqrdykK-Bw",
+  authDomain: "maraisservicemaac.firebaseapp.com",
+  projectId: "maraisservicemaac",
+  storageBucket: "maraisservicemaac.firebasestorage.app",
+  messagingSenderId: "972146607684",
+  appId: "1:972146607684:web:5cb5d7e556818dc7665e11",
+  measurementId: "G-E79P1ZW2W6"
+};
+
+// Cloudflare Worker 代理網址（部署 worker.js 後取得，填入後即可運作）
+const PROXY_URL = "https://maac-proxy.jimmyhung.workers.dev";
+
+// ==============================================
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+const CHANNEL_NAMES = {
+  '4212': '瑪黑家居選物 Line',
+  '9830': '瑪黑客服 Line',
+  '9941': '瑪黑家居選物 FB',
+  '9939': '瑪黑家居選物 IG',
+  '10585': '瑪黑秘密會小幫手 FB'
+};
+
+const FILE_PREFIXES = {
+  '4212': 'marais_line',
+  '9830': 'marais_service_line',
+  '9941': 'marais_fb',
+  '9939': 'marais_ig',
+  '10585': 'marais_secret_fb'
+};
+
+// ===== Auth =====
+
+auth.onAuthStateChanged(user => {
+  if (user) {
+    document.getElementById('loginView').classList.add('hidden');
+    document.getElementById('appView').classList.remove('hidden');
+    document.getElementById('userName').textContent = user.displayName || user.email;
+    document.getElementById('userAvatar').src = user.photoURL || '';
+  } else {
+    document.getElementById('loginView').classList.remove('hidden');
+    document.getElementById('appView').classList.add('hidden');
+  }
+});
+
+function googleLogin() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch(err => {
+    alert('登入失敗: ' + err.message);
+  });
+}
+
+function logout() {
+  auth.signOut();
+}
+
+// ===== Utils =====
+
+function log(msg, type = 'info') {
+  const area = document.getElementById('logArea');
+  const line = document.createElement('div');
+  line.className = 'log-line ' + type;
+  line.textContent = msg;
+  area.appendChild(line);
+  area.scrollTop = area.scrollHeight;
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function toUTC(dateStr, time) {
+  // dateStr = "YYYY-MM-DD"
+  const taipeiDate = new Date(dateStr + 'T' + time + '+08:00');
+  return taipeiDate.toISOString().replace('.000Z', 'Z');
+}
+
+// ===== 主流程 =====
+
+async function execute() {
+  const btn = document.getElementById('btnExecute');
+  const panel = document.getElementById('statusPanel');
+  const logArea = document.getElementById('logArea');
+  const resultCard = document.getElementById('resultCard');
+  const queryInfo = document.getElementById('queryInfo');
+
+  logArea.innerHTML = '';
+  panel.classList.remove('show');
+  resultCard.classList.remove('show', 'error-card');
+  queryInfo.classList.remove('show');
+
+  const selected = document.querySelector('input[name="channel"]:checked');
+  if (!selected) { alert('請選擇一個頻道'); return; }
+  const channelId = selected.value;
+
+  const startStr = document.getElementById('startDate').value;
+  const endStr = document.getElementById('endDate').value;
+
+  if (!startStr) { alert('請選擇起始日期'); return; }
+  if (!endStr) { alert('請選擇結束日期'); return; }
+
+  const startedAt = toUTC(startStr, '00:00:00');
+  const endedAt = toUTC(endStr, '23:59:59');
+
+  document.getElementById('qiChannel').textContent = CHANNEL_NAMES[channelId];
+  document.getElementById('qiStart').textContent = startStr + ' 00:00:00';
+  document.getElementById('qiEnd').textContent = endStr + ' 23:59:59';
+  queryInfo.classList.add('show');
+
+  btn.disabled = true;
+  btn.textContent = '備份中 ...';
+  panel.classList.add('show');
+
+  try {
+    // Step 1: 觸發備份
+    log('正在觸發訊息備份任務 ...', 'info');
+
+    const triggerRes = await fetch(PROXY_URL + '/backup/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        channel_id: parseInt(channelId),
+        started_at: startedAt,
+        ended_at: endedAt
+      })
+    });
+
+    const triggerData = await triggerRes.json();
+    if (triggerData.message) throw new Error(triggerData.message);
+
+    const backupId = triggerData.backup_id;
+    if (!backupId) throw new Error('未取得 backup_id');
+
+    log('備份任務已建立  id: ' + backupId, 'success');
+
+    // Step 2: 輪詢備份狀態
+    log('等待備份處理中 ...', 'dim');
+    let downloadUrl = null;
+
+    for (let i = 0; i < 15; i++) {
+      await sleep(2000);
+      log('查詢備份狀態 ... (' + (i + 1) + '/15)', 'dim');
+
+      const detailRes = await fetch(PROXY_URL + '/backup/' + backupId);
+      const detailData = await detailRes.json();
+
+      if (detailData.download_url) {
+        downloadUrl = detailData.download_url;
+        log('備份檔案已就緒', 'success');
+        break;
+      }
+    }
+
+    if (!downloadUrl) throw new Error('備份逾時，請稍後再試');
+
+    // Step 3: 下載 CSV（透過代理）
+    log('正在下載 CSV ...', 'info');
+
+    const now = new Date();
+    const ts = now.getFullYear()
+      + String(now.getMonth()+1).padStart(2,'0')
+      + String(now.getDate()).padStart(2,'0')
+      + '_'
+      + String(now.getHours()).padStart(2,'0')
+      + '-' + String(now.getMinutes()).padStart(2,'0')
+      + '-' + String(now.getSeconds()).padStart(2,'0');
+
+    const filename = (FILE_PREFIXES[channelId] || 'maac_backup') + '_' + ts + '.csv';
+
+    const csvRes = await fetch(PROXY_URL + '/download?url=' + encodeURIComponent(downloadUrl));
+    const blob = await csvRes.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+
+    log('已下載: ' + filename, 'success');
+
+    resultCard.classList.add('show');
+    document.getElementById('resultText').textContent = '備份完成';
+    document.getElementById('resultSub').textContent = filename;
+
+  } catch (err) {
+    log('錯誤: ' + err.message, 'error');
+    resultCard.classList.add('show', 'error-card');
+    document.getElementById('resultText').textContent = '備份失敗';
+    document.getElementById('resultSub').textContent = err.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '開始備份';
+  }
+}
+</script>
+
+</body>
+</html>
