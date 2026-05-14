@@ -555,8 +555,15 @@ const FILE_PREFIXES = {
 
 // ===== Auth =====
 
+const ALLOWED_DOMAIN = '@storemarais.com';
+
 auth.onAuthStateChanged(user => {
   if (user) {
+    if (!user.email || !user.email.endsWith(ALLOWED_DOMAIN)) {
+      auth.signOut();
+      alert('僅限 ' + ALLOWED_DOMAIN + ' 網域的帳號使用');
+      return;
+    }
     document.getElementById('loginView').classList.add('hidden');
     document.getElementById('appView').classList.remove('hidden');
     document.getElementById('userName').textContent = user.displayName || user.email;
@@ -569,6 +576,7 @@ auth.onAuthStateChanged(user => {
 
 function googleLogin() {
   const provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ hd: 'storemarais.com' });
   auth.signInWithPopup(provider).catch(err => {
     alert('登入失敗: ' + err.message);
   });
