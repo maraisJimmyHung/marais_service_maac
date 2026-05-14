@@ -410,6 +410,19 @@
     color: #9e9588;
   }
 
+  .idle-notice {
+    font-size: 10px;
+    color: #b5ad9e;
+    text-align: center;
+    margin-top: 12px;
+    letter-spacing: 1px;
+  }
+
+  .idle-notice .countdown {
+    font-family: 'SF Mono', 'Menlo', 'Courier New', monospace;
+    color: #8a827a;
+  }
+
   /* ===== 顯示控制 ===== */
   .hidden { display: none !important; }
 </style>
@@ -443,6 +456,8 @@
         </div>
         <button class="btn-logout" onclick="logout()">登出</button>
       </div>
+
+      <div class="idle-notice">閒置自動登出倒數 <span class="countdown" id="countdownDisplay">30:00</span></div>
 
       <span class="section-label">頻道選擇</span>
       <div class="channel-group">
@@ -568,10 +583,60 @@ auth.onAuthStateChanged(user => {
     document.getElementById('appView').classList.remove('hidden');
     document.getElementById('userName').textContent = user.displayName || user.email;
     document.getElementById('userAvatar').src = user.photoURL || '';
+    resetIdleTimer();
   } else {
+    if (idleTimer) clearTimeout(idleTimer);
     document.getElementById('loginView').classList.remove('hidden');
     document.getElementById('appView').classList.add('hidden');
   }
+});
+
+// ===== 閒置自動登出（含倒數計時）=====
+const IDLE_SECONDS = 30 * 60; // 30 分鐘
+let idleTimer = null;
+let countdownInterval = null;
+let remainingSeconds = IDLE_SECONDS;
+
+function updateCountdownDisplay() {
+  const el = document.getElementById('countdownDisplay');
+  if (!el) return;
+  const m = Math.floor(remainingSeconds / 60);
+  const s = remainingSeconds % 60;
+  el.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+
+function startCountdown() {
+  if (countdownInterval) clearInterval(countdownInterval);
+  remainingSeconds = IDLE_SECONDS;
+  updateCountdownDisplay();
+
+  countdownInterval = setInterval(() => {
+    remainingSeconds--;
+    updateCountdownDisplay();
+    if (remainingSeconds <= 0) {
+      clearInterval(countdownInterval);
+      auth.signOut();
+      alert('已閒置超過 30 分鐘，系統已自動登出');
+    }
+  }, 1000);
+}
+
+function resetIdleTimer() {
+  if (idleTimer) clearTimeout(idleTimer);
+  if (countdownInterval) clearInterval(countdownInterval);
+  if (!auth.currentUser) return;
+
+  // 重置顯示為 30:00，停止操作 30 秒後才開始倒數
+  remainingSeconds = IDLE_SECONDS;
+  updateCountdownDisplay();
+
+  idleTimer = setTimeout(() => {
+    startCountdown();
+  }, 30 * 1000);
+}
+
+['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'].forEach(evt => {
+  document.addEventListener(evt, resetIdleTimer, { passive: true });
 });
 
 function googleLogin() {
