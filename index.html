@@ -600,9 +600,8 @@ function log(msg, type = 'info') {
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 function toUTC(dateStr, time) {
-  // dateStr = "YYYY-MM-DD"
-  const taipeiDate = new Date(dateStr + 'T' + time + '+08:00');
-  return taipeiDate.toISOString().replace('.000Z', 'Z');
+  // 直接以日期原值組成 UTC，避免時區偏移導致跨月
+  return dateStr + 'T' + time + 'Z';
 }
 
 // ===== 主流程 =====
